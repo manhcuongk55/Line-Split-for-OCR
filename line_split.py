@@ -5,7 +5,7 @@ import cv2
 import matplotlib.pyplot as plt
 import time
 
-THRESHOLD = 200  # for white background
+THRESHOLD = 200 
 TABLE = [1]*THRESHOLD + [0]*(256-THRESHOLD)
 
 def line_split(image, table=TABLE, split_threshold=4):
@@ -18,27 +18,20 @@ def line_split(image, table=TABLE, split_threshold=4):
 
     image_ = image.convert('L')
     bn = image_.point(table, '1')
-    #bn.save("0_二值化后图像.jpg")
     bn_mat = np.array(bn)
     h, pic_len = bn_mat.shape   #(1944, 1325)
 
-    # 修改思路：不用全0判断，而是用连续性判断，文字行必然是Ture,False交替出现
-    # 因此它的diff值一定经常有1，因为True-Fasle = False-True = True = 1 而全黑全白行diff之后应该全是0
     bn_mat_diff = np.diff(bn_mat)
     project = np.sum(bn_mat_diff, 1) #(1944,)
-    pos = np.where(project <= split_threshold)[0]  # split_threshold不能在设置为0了,10左右应该可以，可以自己调
+    pos = np.where(project <= split_threshold)[0]  
     project[pos] = 0
-    # 正反傅里叶，将信号连续化
-    transformed=np.fft.fft(project) #傅里叶变换
+    
+    transformed=np.fft.fft(project) 
     itransformed_real = np.real(np.fft.ifft(transformed))
     signal = np.around(itransformed_real)
-    #plt.plot(signal)
-    #plt.savefig("1_滤波后信号.jpg")
     pos = np.where(signal <= 0)[0]
 
-    # diff函数就是执行的是后一个元素减去前一个元素
     diff = np.diff(pos)
-    #print(diff)
 
     coordinate = list(zip(pos[:-1], pos[1:]))
     info = list(zip(diff, coordinate))
@@ -53,7 +46,7 @@ def line_split(image, table=TABLE, split_threshold=4):
 
 ###################################test#########################
 
-img = cv2.imread('test5.jpg')
+img = cv2.imread('b.jpg')
 t1 = time.time()
 line_imgs = line_split(img)
 t2 = time.time()
